@@ -61,6 +61,14 @@ main {
   margin-top: 3rem;
 }
 
+.results-details {
+  margin-top: 40px;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+}
+
 html,
 body {
   padding: 0;

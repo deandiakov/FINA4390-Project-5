@@ -4,13 +4,14 @@ import { InputNumber, Button, Dropdown, Menu } from "antd";
 import { DownOutlined } from '@ant-design/icons';
 import { useRouter } from "next/router";
 import "antd/dist/antd.css";
+import axios from 'axios';
 
 export default function Form() {
   const router = useRouter();
   const [loanAmount, setLoanAmount] = useState<number>(0);
-  const [purpose, setPurpose] = useState<string>('Credit Card')
+  const [purpose, setPurpose] = useState<string>('')
   const [income, setIncome] = useState<number>(0);
-  const [employmentLength, setEmploymentLength] = useState<string>('<1 Year');
+  const [employmentLength, setEmploymentLength] = useState<string>('');
   const [homeStatus, setHomeStatus] = useState<string>('');
   const [ficoScore, setFicoScore] = useState<number>(0);
   const [creditBalance, setCreditBalance] = useState<number>(0);
@@ -21,21 +22,58 @@ export default function Form() {
 
 
   const submitData = () => {
-    // TODO: Make the axios call to the model, wait for the response then go to the results page
-    fetch('https://deandiakov.pythonanywhere.com', {
-      method: 'GET',
-      mode: 'cors',
-      cache: 'no-cache',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      redirect: 'follow',
-      referrerPolicy: 'no-referrer',
-    }).then((res) => {
-      console.log(res)
-      router.push({ pathname: "/results", query: { approved: "denied" } });
+    axios.get('http://ml-project5.herokuapp.com/random_forest', {
+      params: {
+        'annual_inc': income,
+        'last_fico_range_low': ficoScore - 2,
+        'last_fico_range_high': ficoScore + 2,
+        'collections_12_mths_ex_med': numCollections,
+        'delinq_2yrs': numDeliquency,
+        'loan_amnt': loanAmount,
+        'open_acc': creditLines,
+        'pub_rec': numRecords,
+        'revol_bal': creditBalance,
+        'emp_length_10+ years': employmentLength === '10+ Years' ? 1 : 0,
+        'emp_length_2 years': employmentLength === '2 Years' ? 1 : 0,
+        'emp_length_3 years': employmentLength === '3 Years' ? 1 : 0,
+        'emp_length_4 years': employmentLength === '4 Years' ? 1 : 0,
+        'emp_length_5 years': employmentLength === '5 Years' ? 1 : 0,
+        'emp_length_6 years': employmentLength === '6 Years' ? 1 : 0,
+        'emp_length_7 years': employmentLength === '7 Years' ? 1 : 0,
+        'emp_length_8 years': employmentLength === '8 Years' ? 1 : 0,
+        'emp_length_9 years': employmentLength === '9 Years' ? 1 : 0,
+        'emp_length__ 1 year': employmentLength === '<1 Year' ? 1 : 0,
+        'home_ownership_MORTGAGE': homeStatus === 'Mortgage' ? 1 : 0,
+        'home_ownership_NONE': homeStatus === 'None' ? 1 : 0,
+        'home_ownership_OTHER': homeStatus === 'Other' ? 1 : 0,
+        'home_ownership_OWN': homeStatus === 'Own' ? 1 : 0,
+        'home_ownership_RENT': homeStatus === 'Rent' ? 1 : 0,
+        'purpose_credit_card': purpose === 'Credit Card' ? 1 : 0,
+        'purpose_debt_consolidation': purpose === 'Consolidation' ? 1 : 0,
+        'purpose_educational': purpose === 'Educational' ? 1 : 0,
+        'purpose_home_improvement': purpose === 'Home Improvement' ? 1 : 0,
+        'purpose_house': purpose === 'House' ? 1 : 0,
+        'purpose_major_purchase': purpose === 'Major Purchase' ? 1 : 0,
+        'purpose_medical': purpose === 'Medical' ? 1 : 0,
+        'purpose_moving': purpose === 'Moving' ? 1 : 0,
+        'purpose_other': purpose === 'Other' ? 1 : 0,
+        'purpose_renewable_energy': purpose === 'Renewable Energy' ? 1 : 0,
+        'purpose_small_business': purpose === 'Small Business' ? 1 : 0,
+        'purpose_vacation': purpose === 'Vacation' ? 1 : 0,
+        'purpose_wedding': purpose === 'Wedding' ? 1 : 0,
+        'grade_B': 1,
+        'grade_C': 0,
+        'grade_D': 0,
+        'grade_E': 0,
+        'grade_F': 0,
+        'grade_G': 0,
+      }
     })
+      .then((res) => res.data)
+      .then((data) => {
+        console.log(data)
+        router.push({ pathname: "/results", query: { approved: data['Predicted class '], ficoScore } })
+      });
   };
 
   const purposes = ['Credit Card', 'Consolidation', 'Educational', 'Home Improvement', 'House', 'Major Purchase', 'Medical',
