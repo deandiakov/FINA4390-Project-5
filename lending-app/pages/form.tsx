@@ -22,7 +22,7 @@ export default function Form() {
 
 
   const submitData = () => {
-    axios.get('http://ml-project5.herokuapp.com/random_forest', {
+    axios.get('https://ml-project5.herokuapp.com/random_forest', {
       params: {
         'annual_inc': income,
         'last_fico_range_low': ficoScore - 2,
